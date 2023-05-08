@@ -1,17 +1,16 @@
 import React, { useState, useEffect} from 'react';
 import { StyleSheet, Text, TouchableWithoutFeedback, View, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import axios from 'axios';
+
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const api=axios.create({
-  baseURL:'http://academico3.rj.senac.br/api/',
-})
+
 const AccordionItem = ({ title, content }) => {
   const [expanded, setExpanded] = useState(false);
+  
   const toggleAccordion = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpanded(!expanded);
@@ -35,24 +34,26 @@ const AccordionItem = ({ title, content }) => {
 };
 
 const Accordion = () => {
-
   const [data, setData] = useState([]);
+  const [dados, setDados] = useState("");
+  const fetchData = async () => {
+    const resp = await fetch("http://academico3.rj.senac.br/api/Acompanhamento/filterByBrupoIdByEstudanteId/1/1");
+    console.log(resp)
+    const data = await resp.json();
+    setData(data[0].situacaoAprendizagem);
+    setDados(dados[0].comentarios)
+  };
 
   useEffect(() => {
-    api.get(`Acompanhamento/filterByBrupoIdByEstudanteId/${1}/${1}`)
-      .then(response=>{
-        data.push(data.request.response)
-      })
-      .catch(error=> {
-        console.log(error)
-      })
-    }, []);
+    fetchData();
+  }, []);
+
 
   return (
     <View style={styles.container}>
       <AccordionItem
-        title={data.situacaoAprendizagem.titulo}
-        content={data[0].comentarios.comentario}
+        title={data.titulo}
+        content= {dados.comentario}
       />
     </View>
   );
@@ -64,7 +65,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   accordionItem: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#205395',
     borderRadius: 5,
     marginBottom: 10,
     overflow: 'hidden',
@@ -78,6 +79,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#fff'
   },
   contentText: {
     padding: 10,
